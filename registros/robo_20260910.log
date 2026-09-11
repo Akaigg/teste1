@@ -1,0 +1,79 @@
+2026-09-10 10:56:19 | INFO | Iniciando operação | WINV26 M5 | estratégia=force_index_2 | stop=1.0xATR alvo=4.0xATR | contratos=1 | modo=REAL
+2026-09-10 10:56:19 | INFO | Conta 59298610 (VITOR MACHADO BLUME) @ XPMT5-DEMO | Saldo: 1000247.00 BRL | Patrimônio: 1000247.00
+2026-09-10 10:56:19 | INFO | Distância mínima de stop/alvo: 0 pontos | um trade por vez: não
+2026-09-10 10:56:19 | INFO | Pressione Ctrl+C para encerrar.
+2026-09-10 10:56:19 | INFO | Sinal COMPRA em 2026-09-10 10:50:00 | ref=187535.00 stop=187094.49 alvo=189297.06
+2026-09-10 10:56:19 | INFO | [MT5] Ordem executada: COMPRA 1 WINV26 @ 187535.0 stop=187095.0 alvo=189295.0 ticket=2523701637
+2026-09-10 11:14:59 | INFO | Sinal contrário: encerrando posição.
+2026-09-10 11:14:59 | INFO | [MT5] Posição 2523701637 fechada (sinal_contrario) @ 187770.0
+2026-09-10 11:14:59 | INFO | Sinal VENDA em 2026-09-10 11:10:00 | ref=187770.00 stop=188204.26 alvo=186032.96
+2026-09-10 11:14:59 | INFO | [MT5] Ordem executada: VENDA 1 WINV26 @ 187770.0 stop=188205.0 alvo=186035.0 ticket=2523755444
+2026-09-10 11:20:00 | INFO | Sinal COMPRA em 2026-09-10 11:15:00 | ref=188055.00 stop=187617.83 alvo=189803.68
+2026-09-10 11:20:00 | INFO | [MT5] Ordem executada: COMPRA 1 WINV26 @ 188055.0 stop=187620.0 alvo=189805.0 ticket=2523771452
+2026-09-10 11:50:01 | INFO | 2026-09-10 11:45:00 | sem sinal | fechamento 189790.00
+2026-09-10 11:55:01 | INFO | 2026-09-10 11:50:00 | sem sinal | fechamento 190115.00
+2026-09-10 12:00:01 | INFO | 2026-09-10 11:55:00 | sem sinal | fechamento 190410.00
+2026-09-10 12:05:01 | INFO | 2026-09-10 12:00:00 | sem sinal | fechamento 190410.00
+2026-09-10 12:10:16 | INFO | 2026-09-10 12:05:00 | sem sinal | fechamento 190420.00
+2026-09-10 12:15:01 | INFO | 2026-09-10 12:10:00 | sem sinal | fechamento 190555.00
+2026-09-10 12:20:01 | INFO | 2026-09-10 12:15:00 | sem sinal | fechamento 190700.00
+2026-09-10 12:25:02 | INFO | Sinal VENDA em 2026-09-10 12:20:00 | ref=190575.00 stop=190979.37 alvo=188957.51
+2026-09-10 12:25:02 | INFO | [MT5] Ordem executada: VENDA 1 WINV26 @ 190575.0 stop=190980.0 alvo=188960.0 ticket=2523970809
+2026-09-10 13:05:03 | INFO | Sinal contrário: encerrando posição.
+2026-09-10 13:05:03 | INFO | [MT5] Posição 2523970809 fechada (sinal_contrario) @ 189400.0
+2026-09-10 13:05:03 | INFO | Sinal COMPRA em 2026-09-10 13:00:00 | ref=189400.00 stop=189028.74 alvo=190885.05
+2026-09-10 13:05:03 | INFO | [MT5] Ordem executada: COMPRA 1 WINV26 @ 189400.0 stop=189030.0 alvo=190885.0 ticket=2524033262
+2026-09-10 13:07:18 | INFO | Operação encerrada.
+2026-09-10 13:15:46 | INFO | Filtro de IA treinado com 619 trades | ponto de equilíbrio 30% + margem 5% = veta abaixo de 35% | acurácia CV ≈ 55.4%.
+2026-09-10 13:15:46 | INFO | Iniciando operação | WINV26 M5 | estratégia=roc_zero_20 | stop=3.0xATR alvo=3.0xATR | contratos=1 | modo=REAL
+2026-09-10 13:15:46 | INFO | Conta 59298610 (VITOR MACHADO BLUME) @ XPMT5-DEMO | Saldo: 1000783.00 BRL | Patrimônio: 1000783.00
+2026-09-10 13:15:46 | INFO | Distância mínima de stop/alvo: 0 pontos | um trade por vez: não
+2026-09-10 13:15:46 | INFO | Pressione Ctrl+C para encerrar.
+2026-09-10 13:15:46 | INFO | 2026-09-10 13:10:00 | sem sinal | fechamento 189595.00
+2026-09-10 13:20:01 | INFO | 2026-09-10 13:15:00 | sem sinal | fechamento 189520.00
+2026-09-10 13:25:01 | INFO | 2026-09-10 13:20:00 | sem sinal | fechamento 189625.00
+2026-09-10 13:30:02 | INFO | 2026-09-10 13:25:00 | sem sinal | fechamento 189795.00
+2026-09-10 13:36:07 | INFO | Sinal VENDA vetado pela IA (p=0.34 < 0.35).
+2026-09-10 13:40:02 | INFO | 2026-09-10 13:35:00 | sem sinal | fechamento 189895.00
+2026-09-10 13:45:04 | INFO | 2026-09-10 13:40:00 | sem sinal | fechamento 189915.00
+2026-09-10 13:50:00 | INFO | 2026-09-10 13:45:00 | sem sinal | fechamento 190050.00
+2026-09-10 13:55:00 | INFO | 2026-09-10 13:50:00 | sem sinal | fechamento 189990.00
+2026-09-10 14:00:01 | INFO | 2026-09-10 13:55:00 | sem sinal | fechamento 190125.00
+2026-09-10 14:05:07 | INFO | 2026-09-10 14:00:00 | sem sinal | fechamento 190015.00
+2026-09-10 14:10:02 | INFO | 2026-09-10 14:05:00 | sem sinal | fechamento 190095.00
+2026-09-10 14:15:02 | INFO | 2026-09-10 14:10:00 | sem sinal | fechamento 190045.00
+2026-09-10 14:20:06 | INFO | IA aprovou o sinal (p=0.40 ≥ 0.35).
+2026-09-10 14:20:06 | INFO | Sinal COMPRA em 2026-09-10 14:15:00 | ref=190330.00 stop=189435.29 alvo=191224.71
+2026-09-10 14:20:07 | INFO | [MT5] Ordem executada: COMPRA 1 WINV26 @ 190315.0 stop=189435.0 alvo=191225.0 ticket=2524129448
+2026-09-10 14:55:00 | INFO | Sinal contrário: encerrando posição.
+2026-09-10 14:55:00 | INFO | [MT5] Posição 2524129448 fechada (sinal_contrario) @ 189590.0
+2026-09-10 14:55:00 | INFO | IA aprovou o sinal (p=0.56 ≥ 0.35).
+2026-09-10 14:55:00 | INFO | Sinal VENDA em 2026-09-10 14:50:00 | ref=189590.00 stop=190511.79 alvo=188668.21
+2026-09-10 14:55:00 | INFO | [MT5] Ordem executada: VENDA 1 WINV26 @ 189590.0 stop=190510.0 alvo=188670.0 ticket=2524181876
+2026-09-10 15:00:01 | INFO | Sinal contrário: encerrando posição.
+2026-09-10 15:00:01 | INFO | [MT5] Posição 2524181876 fechada (sinal_contrario) @ 189815.0
+2026-09-10 15:00:01 | INFO | IA aprovou o sinal (p=0.48 ≥ 0.35).
+2026-09-10 15:00:01 | INFO | Sinal COMPRA em 2026-09-10 14:55:00 | ref=189815.00 stop=188889.41 alvo=190740.59
+2026-09-10 15:00:01 | INFO | [MT5] Ordem executada: COMPRA 1 WINV26 @ 189815.0 stop=188890.0 alvo=190740.0 ticket=2524188087
+2026-09-10 15:20:02 | INFO | Sinal contrário: encerrando posição.
+2026-09-10 15:20:02 | INFO | [MT5] Posição 2524188087 fechada (sinal_contrario) @ 189870.0
+2026-09-10 15:20:02 | INFO | IA aprovou o sinal (p=0.40 ≥ 0.35).
+2026-09-10 15:20:02 | INFO | Sinal VENDA em 2026-09-10 15:15:00 | ref=189870.00 stop=190738.18 alvo=189001.82
+2026-09-10 15:20:02 | INFO | [MT5] Ordem executada: VENDA 1 WINV26 @ 189870.0 stop=190740.0 alvo=189000.0 ticket=2524232044
+2026-09-10 15:25:02 | INFO | Sinal contrário: encerrando posição.
+2026-09-10 15:25:02 | INFO | [MT5] Posição 2524232044 fechada (sinal_contrario) @ 190050.0
+2026-09-10 15:25:02 | INFO | Sinal COMPRA vetado pela IA (p=0.35 < 0.35).
+2026-09-10 15:30:02 | INFO | IA aprovou o sinal (p=0.40 ≥ 0.35).
+2026-09-10 15:30:02 | INFO | Sinal VENDA em 2026-09-10 15:25:00 | ref=189975.00 stop=190814.89 alvo=189135.11
+2026-09-10 15:30:02 | INFO | [MT5] Ordem executada: VENDA 1 WINV26 @ 189975.0 stop=190815.0 alvo=189135.0 ticket=2524256847
+2026-09-10 15:35:47 | INFO | Sinal contrário: encerrando posição.
+2026-09-10 15:35:47 | INFO | [MT5] Posição 2524256847 fechada (sinal_contrario) @ 190115.0
+2026-09-10 15:35:47 | INFO | IA aprovou o sinal (p=0.41 ≥ 0.35).
+2026-09-10 15:35:47 | INFO | Sinal COMPRA em 2026-09-10 15:30:00 | ref=190115.00 stop=189292.25 alvo=190937.75
+2026-09-10 15:35:47 | INFO | [MT5] Ordem executada: COMPRA 1 WINV26 @ 190115.0 stop=189290.0 alvo=190940.0 ticket=2524272110
+2026-09-10 15:40:03 | INFO | Sinal contrário: encerrando posição.
+2026-09-10 15:40:03 | INFO | [MT5] Posição 2524272110 fechada (sinal_contrario) @ 190080.0
+2026-09-10 15:40:04 | INFO | IA aprovou o sinal (p=0.37 ≥ 0.35).
+2026-09-10 15:40:04 | INFO | Sinal VENDA em 2026-09-10 15:35:00 | ref=190080.00 stop=190899.70 alvo=189260.30
+2026-09-10 15:40:04 | INFO | [MT5] Ordem executada: VENDA 1 WINV26 @ 190080.0 stop=190900.0 alvo=189260.0 ticket=2524277177
+2026-09-10 15:43:19 | INFO | Operação encerrada.

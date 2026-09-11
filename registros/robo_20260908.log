@@ -1,0 +1,84 @@
+2026-09-08 10:44:30 | INFO | Filtro de IA treinado com 192 trades | acurácia CV ≈ 57.3%
+2026-09-08 10:44:30 | INFO | Iniciando operação | WINV26 M5 | estratégia=cruzamento_medias_12_26 | stop=3.0xATR alvo=2.0xATR | contratos=1 | modo=SIMULADO
+2026-09-08 10:44:30 | INFO | Conta 0 (SIMULADO) @ paper | Saldo: 10000.00  | Patrimônio: 10000.00
+2026-09-08 10:44:30 | INFO | Distância mínima de stop/alvo: 0 pontos | um trade por vez: não
+2026-09-08 10:44:30 | INFO | Pressione Ctrl+C para encerrar.
+2026-09-08 10:44:30 | INFO | 2026-09-08 10:35:00 | sem sinal | fechamento 190440.00
+2026-09-08 10:45:00 | INFO | 2026-09-08 10:40:00 | sem sinal | fechamento 191200.00
+2026-09-08 10:50:00 | INFO | 2026-09-08 10:45:00 | sem sinal | fechamento 191065.00
+2026-09-08 10:53:00 | INFO | Operação encerrada.
+2026-09-08 10:53:10 | INFO | Filtro de IA treinado com 972 trades | acurácia CV ≈ 64.9%
+2026-09-08 10:53:10 | INFO | Iniciando operação | WINV26 M5 | estratégia=contracao_nr_4 | stop=1.0xATR alvo=3.0xATR | contratos=1 | modo=SIMULADO
+2026-09-08 10:53:10 | INFO | Conta 0 (SIMULADO) @ paper | Saldo: 10000.00  | Patrimônio: 10000.00
+2026-09-08 10:53:10 | INFO | Distância mínima de stop/alvo: 0 pontos | um trade por vez: não
+2026-09-08 10:53:10 | INFO | Pressione Ctrl+C para encerrar.
+2026-09-08 10:53:10 | INFO | 2026-09-08 10:45:00 | sem sinal | fechamento 191065.00
+2026-09-08 10:55:00 | INFO | 2026-09-08 10:50:00 | sem sinal | fechamento 191570.00
+2026-09-08 11:00:00 | INFO | 2026-09-08 10:55:00 | sem sinal | fechamento 191440.00
+2026-09-08 11:05:00 | INFO | 2026-09-08 11:00:00 | sem sinal | fechamento 191615.00
+2026-09-08 11:10:16 | INFO | 2026-09-08 11:05:00 | sem sinal | fechamento 191670.00
+2026-09-08 11:15:01 | INFO | 2026-09-08 11:10:00 | sem sinal | fechamento 191455.00
+2026-09-08 11:18:36 | INFO | Operação encerrada.
+2026-09-08 11:18:46 | INFO | Filtro de IA treinado com 2046 trades | acurácia CV ≈ 66.9%
+2026-09-08 11:18:46 | INFO | Iniciando operação | WINV26 M5 | estratégia=force_index_2 | stop=1.0xATR alvo=3.0xATR | contratos=1 | modo=SIMULADO
+2026-09-08 11:18:46 | INFO | Conta 0 (SIMULADO) @ paper | Saldo: 10000.00  | Patrimônio: 10000.00
+2026-09-08 11:18:46 | INFO | Distância mínima de stop/alvo: 0 pontos | um trade por vez: não
+2026-09-08 11:18:46 | INFO | Pressione Ctrl+C para encerrar.
+2026-09-08 11:18:46 | INFO | Sinal VENDA vetado pela IA (p=0.32).
+2026-09-08 11:20:01 | INFO | 2026-09-08 11:15:00 | sem sinal | fechamento 191245.00
+2026-09-08 11:25:01 | INFO | Sinal COMPRA vetado pela IA (p=0.33).
+2026-09-08 11:30:02 | INFO | 2026-09-08 11:25:00 | sem sinal | fechamento 191605.00
+2026-09-08 11:35:02 | INFO | 2026-09-08 11:30:00 | sem sinal | fechamento 191695.00
+2026-09-08 11:40:02 | INFO | Sinal VENDA vetado pela IA (p=0.36).
+2026-09-08 11:42:30 | INFO | Operação encerrada.
+2026-09-08 11:44:02 | INFO | Filtro de IA treinado com 2049 trades | acurácia CV ≈ 66.9%
+2026-09-08 11:44:02 | INFO | Iniciando operação | WINV26 M5 | estratégia=force_index_2 | stop=1.0xATR alvo=3.0xATR | contratos=1 | modo=SIMULADO
+2026-09-08 11:44:02 | INFO | Conta 0 (SIMULADO) @ paper | Saldo: 10000.00  | Patrimônio: 10000.00
+2026-09-08 11:44:02 | INFO | Distância mínima de stop/alvo: 0 pontos | um trade por vez: não
+2026-09-08 11:44:02 | INFO | Pressione Ctrl+C para encerrar.
+2026-09-08 11:44:02 | INFO | Sinal VENDA vetado pela IA (p=0.43).
+2026-09-08 11:44:11 | INFO | Operação encerrada.
+2026-09-08 11:44:12 | INFO | Iniciando operação | WINV26 M5 | estratégia=force_index_2 | stop=1.0xATR alvo=3.0xATR | contratos=1 | modo=SIMULADO
+2026-09-08 11:44:12 | INFO | Conta 0 (SIMULADO) @ paper | Saldo: 10000.00  | Patrimônio: 10000.00
+2026-09-08 11:44:12 | INFO | Distância mínima de stop/alvo: 0 pontos | um trade por vez: não
+2026-09-08 11:44:12 | INFO | Pressione Ctrl+C para encerrar.
+2026-09-08 11:44:12 | INFO | Sinal VENDA em 2026-09-08 11:35:00 | ref=191280.00 stop=191761.28 alvo=189836.15
+2026-09-08 11:44:12 | INFO | [SIMULADO] Ordem VENDA 1 WINV26 enviada (ref 191280.00); preenche na abertura do próximo candle. (force_index_2)
+2026-09-08 11:45:02 | INFO | [SIMULADO] VENDA preenchida @ 191280.00 stop=191761.28 alvo=189836.15 em 2026-09-08 11:40:00
+2026-09-08 11:46:03 | INFO | Operação encerrada.
+2026-09-08 11:46:07 | INFO | Iniciando operação | WINV26 M5 | estratégia=force_index_2 | stop=1.0xATR alvo=3.0xATR | contratos=1 | modo=REAL
+2026-09-08 11:46:07 | INFO | Conta 59298610 (VITOR MACHADO BLUME) @ XPMT5-DEMO | Saldo: 1000000.00 BRL | Patrimônio: 1000000.00
+2026-09-08 11:46:07 | INFO | Distância mínima de stop/alvo: 0 pontos | um trade por vez: não
+2026-09-08 11:46:07 | INFO | Pressione Ctrl+C para encerrar.
+2026-09-08 11:46:07 | INFO | 2026-09-08 11:40:00 | sem sinal | fechamento 191290.00
+2026-09-08 11:50:02 | INFO | Sinal COMPRA em 2026-09-08 11:45:00 | ref=191540.00 stop=191074.17 alvo=192937.48
+2026-09-08 11:50:02 | INFO | [MT5] Ordem executada: COMPRA 1 WINV26 @ 191540.0 stop=191075.0 alvo=192935.0 ticket=2521465082
+2026-09-08 11:55:02 | INFO | Sinal contrário: encerrando posição.
+2026-09-08 11:55:02 | INFO | [MT5] Posição 2521465082 fechada (sinal_contrario) @ 191415.0
+2026-09-08 11:55:02 | INFO | Sinal VENDA em 2026-09-08 11:50:00 | ref=191415.00 stop=191868.62 alvo=190054.13
+2026-09-08 11:55:03 | INFO | [MT5] Ordem executada: VENDA 1 WINV26 @ 191415.0 stop=191870.0 alvo=190055.0 ticket=2521478626
+2026-09-08 13:00:00 | INFO | 2026-09-08 12:55:00 | sem sinal | fechamento 190090.00
+2026-09-08 13:00:10 | INFO | Operação encerrada.
+2026-09-08 14:12:11 | INFO | Filtro de IA treinado com 176 trades | ponto de equilíbrio 39% + margem 5% = veta abaixo de 44% | acurácia CV ≈ 53.4%.
+2026-09-08 14:12:11 | INFO | Iniciando operação | WINV26 M5 | estratégia=canal_atr_10_2p0 | stop=2.0xATR alvo=3.0xATR | contratos=1 | modo=REAL
+2026-09-08 14:12:11 | INFO | Conta 59298610 (VITOR MACHADO BLUME) @ XPMT5-DEMO | Saldo: 1000247.00 BRL | Patrimônio: 1000247.00
+2026-09-08 14:12:11 | INFO | Distância mínima de stop/alvo: 0 pontos | um trade por vez: não
+2026-09-08 14:12:11 | INFO | Pressione Ctrl+C para encerrar.
+2026-09-08 14:12:11 | INFO | 2026-09-08 14:05:00 | sem sinal | fechamento 189910.00
+2026-09-08 14:14:45 | INFO | Operação encerrada.
+2026-09-08 14:15:22 | INFO | Filtro de IA treinado com 2053 trades | ponto de equilíbrio 30% + margem 5% = veta abaixo de 35% | acurácia CV ≈ 67.0%.
+2026-09-08 14:15:22 | INFO | Iniciando operação | WINV26 M5 | estratégia=force_index_2 | stop=1.0xATR alvo=3.0xATR | contratos=1 | modo=REAL
+2026-09-08 14:15:22 | INFO | Conta 59298610 (VITOR MACHADO BLUME) @ XPMT5-DEMO | Saldo: 1000247.00 BRL | Patrimônio: 1000247.00
+2026-09-08 14:15:22 | INFO | Distância mínima de stop/alvo: 0 pontos | um trade por vez: não
+2026-09-08 14:15:22 | INFO | Pressione Ctrl+C para encerrar.
+2026-09-08 14:15:22 | INFO | 2026-09-08 14:10:00 | sem sinal | fechamento 189915.00
+2026-09-08 14:20:02 | INFO | 2026-09-08 14:15:00 | sem sinal | fechamento 190030.00
+2026-09-08 14:25:02 | INFO | 2026-09-08 14:20:00 | sem sinal | fechamento 190120.00
+2026-09-08 14:30:03 | INFO | 2026-09-08 14:25:00 | sem sinal | fechamento 190155.00
+2026-09-08 14:35:03 | INFO | Sinal VENDA vetado pela IA (p=0.28 < 0.35).
+2026-09-08 14:40:03 | INFO | 2026-09-08 14:35:00 | sem sinal | fechamento 190040.00
+2026-09-08 14:45:03 | INFO | Sinal COMPRA vetado pela IA (p=0.29 < 0.35).
+2026-09-08 14:50:03 | INFO | Sinal VENDA vetado pela IA (p=0.31 < 0.35).
+2026-09-08 14:54:58 | INFO | 2026-09-08 14:50:00 | sem sinal | fechamento 189925.00
+2026-09-08 14:59:59 | INFO | Sinal COMPRA vetado pela IA (p=0.28 < 0.35).
+2026-09-08 15:04:37 | INFO | Operação encerrada.

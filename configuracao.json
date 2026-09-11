@@ -1,0 +1,52 @@
+{
+  "ativo": "WINV26",
+  "timeframe": "M1",
+  "contratos": 1,
+  "barras_historico": 20000,
+  "fonte_dados": "mt5",
+  "arquivo_csv": "",
+  "caminho_terminal_mt5": "",
+  "valor_ponto": 1.0,
+  "custo_pontos_por_operacao": 0.0,
+  "deslizamento_pontos": 0.0,
+  "capital_inicial": 10000.0,
+  "backtest": {
+    "fechar_fim_dia": true,
+    "sair_sinal_contrario": true,
+    "max_barras_posicao": 0,
+    "proporcao_treino": 0.7,
+    "n_janelas": 6,
+    "min_trades": 30,
+    "grade_stop_atr": [
+      1.0,
+      1.5,
+      2.0,
+      3.0
+    ],
+    "grade_alvo_atr": [
+      1.0,
+      1.5,
+      2.0,
+      3.0,
+      4.0
+    ],
+    "peso_validacao": 0.6
+  },
+  "execucao": {
+    "modo": "real",
+    "intervalo_segundos": 5,
+    "perda_maxima_diaria": 0.0,
+    "horario_inicio": "09:05",
+    "horario_fim": "17:00",
+    "reavaliar_a_cada_horas": 0.0,
+    "magic": 20260907,
+    "desvio_maximo_pontos": 10,
+    "um_trade_por_vez": false,
+    "distancia_minima_stop_pontos": 0.0
+  },
+  "ia": {
+    "ativar": true,
+    "margem_probabilidade": 0.05,
+    "min_trades_treino": 60
+  }
+}

@@ -1,0 +1,31 @@
+2026-09-09 10:22:39 | INFO | Filtro de IA treinado com 377 trades | ponto de equilíbrio 27% + margem 5% = veta abaixo de 32% | acurácia CV ≈ 61.0%.
+2026-09-09 10:22:39 | INFO | Iniciando operação | WINV26 M5 | estratégia=supertrend_7_2p0 | stop=1.0xATR alvo=3.0xATR | contratos=1 | modo=REAL
+2026-09-09 10:22:39 | INFO | Conta 59298610 (VITOR MACHADO BLUME) @ XPMT5-DEMO | Saldo: 1000247.00 BRL | Patrimônio: 1000247.00
+2026-09-09 10:22:39 | INFO | Distância mínima de stop/alvo: 0 pontos | um trade por vez: não
+2026-09-09 10:22:39 | INFO | Pressione Ctrl+C para encerrar.
+2026-09-09 10:22:39 | INFO | 2026-09-09 10:15:00 | sem sinal | fechamento 188495.00
+2026-09-09 10:24:59 | INFO | 2026-09-09 10:20:00 | sem sinal | fechamento 188410.00
+2026-09-09 10:29:59 | INFO | 2026-09-09 10:25:00 | sem sinal | fechamento 188675.00
+2026-09-09 10:34:59 | INFO | 2026-09-09 10:30:00 | sem sinal | fechamento 188635.00
+2026-09-09 10:39:59 | INFO | 2026-09-09 10:35:00 | sem sinal | fechamento 188130.00
+2026-09-09 10:45:00 | INFO | 2026-09-09 10:40:00 | sem sinal | fechamento 188635.00
+2026-09-09 10:50:05 | INFO | 2026-09-09 10:45:00 | sem sinal | fechamento 189090.00
+2026-09-09 10:55:00 | INFO | 2026-09-09 10:50:00 | sem sinal | fechamento 188940.00
+2026-09-09 11:00:00 | INFO | 2026-09-09 10:55:00 | sem sinal | fechamento 188775.00
+2026-09-09 11:05:00 | INFO | 2026-09-09 11:00:00 | sem sinal | fechamento 188680.00
+2026-09-09 11:10:01 | INFO | 2026-09-09 11:05:00 | sem sinal | fechamento 188550.00
+2026-09-09 11:15:01 | INFO | 2026-09-09 11:10:00 | sem sinal | fechamento 188390.00
+2026-09-09 11:20:01 | INFO | 2026-09-09 11:15:00 | sem sinal | fechamento 188285.00
+2026-09-09 11:25:01 | INFO | 2026-09-09 11:20:00 | sem sinal | fechamento 188325.00
+2026-09-09 11:30:01 | INFO | 2026-09-09 11:25:00 | sem sinal | fechamento 188255.00
+2026-09-09 11:35:01 | INFO | 2026-09-09 11:30:00 | sem sinal | fechamento 188160.00
+2026-09-09 11:40:02 | INFO | 2026-09-09 11:35:00 | sem sinal | fechamento 188190.00
+2026-09-09 11:45:02 | INFO | 2026-09-09 11:40:00 | sem sinal | fechamento 188100.00
+2026-09-09 11:50:02 | INFO | 2026-09-09 11:45:00 | sem sinal | fechamento 187780.00
+2026-09-09 11:55:02 | INFO | 2026-09-09 11:50:00 | sem sinal | fechamento 187725.00
+2026-09-09 12:00:02 | INFO | 2026-09-09 11:55:00 | sem sinal | fechamento 187765.00
+2026-09-09 12:05:02 | INFO | 2026-09-09 12:00:00 | sem sinal | fechamento 187470.00
+2026-09-09 12:10:03 | INFO | 2026-09-09 12:05:00 | sem sinal | fechamento 187375.00
+2026-09-09 12:15:03 | INFO | 2026-09-09 12:10:00 | sem sinal | fechamento 187270.00
+2026-09-09 12:20:18 | INFO | 2026-09-09 12:15:00 | sem sinal | fechamento 187095.00
+2026-09-09 12:22:03 | INFO | Operação encerrada.

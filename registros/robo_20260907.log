@@ -1,0 +1,6 @@
+2026-09-07 22:04:06 | INFO | Filtro de IA treinado com 338 trades | acurácia CV ≈ 63.9%
+2026-09-07 22:04:06 | INFO | Iniciando operação | WINV26 M5 | estratégia=vwap_pullback_20 | stop=3.0xATR alvo=1.0xATR | contratos=1 | modo=SIMULADO
+2026-09-07 22:04:06 | INFO | Conta 0 (SIMULADO) @ paper | Saldo: 10000.00  | Patrimônio: 10000.00
+2026-09-07 22:04:06 | INFO | Distância mínima de stop/alvo: 50 pontos | um trade por vez: não
+2026-09-07 22:04:06 | INFO | Pressione Ctrl+C para encerrar.
+2026-09-07 22:04:45 | INFO | Operação encerrada.
