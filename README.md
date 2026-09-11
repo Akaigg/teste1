@@ -24,6 +24,18 @@ python main.py                           # abre a INTERFACE GRÁFICA
 python main.py menu                      # alternativa: menu interativo no terminal
 ```
 
+## Executável (sem terminal)
+
+```bash
+python empacotar.py --atalho        # gera dist/RoboMT5/RoboMT5.exe e um atalho na Área de Trabalho
+```
+
+Dois cliques em `RoboMT5.exe` (ou no atalho) abrem a interface gráfica. `configuracao.json`, `resultados/` e
+`registros/` são criados **ao lado do .exe**. Para levar o programa a outro computador, copie a pasta `dist/RoboMT5`
+inteira. Os subcomandos também funcionam pelo .exe (`RoboMT5.exe backtest`), mas como ele não tem console a saída
+vai para `registros/terminal_<data>.txt`; para depurar com console use `python empacotar.py --console`.
+O MetaTrader 5 continua precisando estar instalado e aberto com a conta logada.
+
 ## Interface gráfica
 
 | Aba | O que faz |

@@ -13,7 +13,9 @@ import os
 from dataclasses import dataclass, field, asdict
 from typing import List
 
-CAMINHO_PADRAO = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "configuracao.json")
+from config.caminhos import caminho
+
+CAMINHO_PADRAO = caminho("configuracao.json")
 
 
 @dataclass
@@ -109,7 +111,7 @@ class Configuracao:
             cfg = cls()
             cfg.salvar(caminho)
             return cfg
-        with open(caminho, "r", encoding="utf-8") as arq:
+        with open(caminho, "r", encoding="utf-8-sig") as arq:  # tolera o BOM que o Bloco de Notas adiciona
             return cls.de_dict(json.load(arq))
 
     def resumo(self) -> str:

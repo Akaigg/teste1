@@ -8,7 +8,9 @@ from typing import List, Optional
 
 import numpy as np
 
-PASTA_RESULTADOS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "resultados")
+from config.caminhos import caminho
+
+PASTA_RESULTADOS = caminho("resultados")
 
 
 def _serializar(obj):
