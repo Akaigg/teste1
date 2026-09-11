@@ -4,9 +4,12 @@ Robô de trading em Python, com **interface gráfica** (Tkinter, sem dependênci
 menu/CLI de terminal, que:
 
 - conecta-se à **conta já logada** no MetaTrader 5 (não pede usuário/senha);
-- avalia **117 estratégias** (8 famílias) em backtest sobre o histórico do ativo escolhido;
+- avalia **58 estratégias robustas** (8 famílias: pontuação ponderada de vários indicadores, regime adaptativo,
+  estatística, confluência multi-timeframe, divergência por pivôs, fluxo de volume, estrutura de mercado e ensemble)
+  em backtest sobre o histórico do ativo escolhido;
 - ajusta automaticamente **stop e alvo** de cada estratégia (múltiplos de ATR) numa grade de valores;
 - escolhe a estratégia com a **melhor consistência** (não o maior lucro), usando treino + validação fora da amostra;
+- faz **walk-forward** (reotimização periódica + teste sempre fora da amostra) para verificar se a consistência se mantém;
 - opera automaticamente com a quantidade de contratos configurada, em modo **simulado** (padrão) ou **real**;
 - opcionalmente usa um **filtro de IA** (RandomForest) que veta sinais de baixa probabilidade.
 
@@ -21,13 +24,26 @@ python main.py                           # abre a INTERFACE GRÁFICA
 python main.py menu                      # alternativa: menu interativo no terminal
 ```
 
+## Executável (sem terminal)
+
+```bash
+python empacotar.py --atalho        # gera dist/RoboMT5/RoboMT5.exe e um atalho na Área de Trabalho
+```
+
+Dois cliques em `RoboMT5.exe` (ou no atalho) abrem a interface gráfica. `configuracao.json`, `resultados/` e
+`registros/` são criados **ao lado do .exe**. Para levar o programa a outro computador, copie a pasta `dist/RoboMT5`
+inteira. Os subcomandos também funcionam pelo .exe (`RoboMT5.exe backtest`), mas como ele não tem console a saída
+vai para `registros/terminal_<data>.txt`; para depurar com console use `python empacotar.py --console`.
+O MetaTrader 5 continua precisando estar instalado e aberto com a conta logada.
+
 ## Interface gráfica
 
 | Aba | O que faz |
 |---|---|
 | **1. Configuração** | todos os parâmetros do `configuracao.json` em formulário; botão *Testar conexão MT5* mostra a conta logada. Passe o mouse sobre um campo para ver a explicação na barra de status. |
-| **2. Backtest & Ranking** | *Rodar backtest* avalia as 117 estratégias em segundo plano com barra de progresso; a tabela mostra o ranking (a 1ª colocada fica destacada). Duplo clique abre a janela de **detalhes** (métricas de treino / validação / total e curva de capital). *Usar na operação* leva a estratégia selecionada para a aba 3. |
+| **2. Backtest & Ranking** | *Rodar backtest* avalia as 58 estratégias em segundo plano com barra de progresso; a tabela mostra o ranking (a 1ª colocada fica destacada). Duplo clique abre a janela de **detalhes** (métricas de treino / validação / total e curva de capital). *Usar na operação* leva a estratégia selecionada para a aba 3. |
 | **3. Operação** | escolha da estratégia (entre as elegíveis do ranking), contratos, modo simulado/REAL, filtro de IA, botões *Iniciar* / *Parar*, painel de status (conta, posição, resultado do dia) e o registro em tempo real. O modo REAL pede confirmação explícita. |
+| **4. Walk-forward** | escolha uma estratégia (do ranking ou do catálogo), o número de janelas, a fração de treino e se o treino é ancorado; *Rodar walk-forward* mostra o resumo (veredito, pontuação, eficiência, % de janelas lucrativas), a tabela janela a janela e a curva de capital fora da amostra. *Comparar as melhores do ranking* roda o walk-forward das N primeiras e ordena pela pontuação walk-forward. |
 | **Estratégias** | catálogo completo filtrável por família. |
 
 Sem MT5 (ex.: fonte `csv` ou `sintetico`) a operação simulada faz **replay** do histórico, útil para ver o robô funcionando.
@@ -45,7 +61,10 @@ python main.py detalhes 1                      # métricas detalhadas da 1ª col
 python main.py operar                          # opera em modo SIMULADO com a melhor estratégia
 python main.py operar --real                   # envia ordens REAIS (pede confirmação)
 python main.py operar --estrategia donchian_20 # força uma estratégia do ranking
-python main.py listar                          # lista as 117 estratégias
+python main.py listar                          # lista as 58 estratégias
+python main.py walkforward                     # walk-forward da melhor estratégia do ranking
+python main.py walkforward --estrategia ensemble_0p3_4_3 --janelas 8 --treino 0.7
+python main.py walkforward --top 10            # compara as 10 melhores do ranking fora da amostra
 python main.py conexao                         # testa a conexão com o MT5
 
 # sobrescritas rápidas (não alteram o arquivo de configuração):
@@ -80,6 +99,41 @@ python main.py --fonte sintetico --ativo TESTE backtest
 | `execucao.reavaliar_a_cada_horas` | reexecuta o ranking durante a operação e troca de estratégia se necessário (0 = nunca) |
 | `ia.ativar` | liga o filtro de IA (requer scikit-learn). Com ele ativo, o ranking mostra as notas **sem IA** e **com IA** (filtro treinado só no treino e aplicado na validação) e é ordenado pela nota com IA |
 | `ia.margem_probabilidade` | a IA veta o sinal quando a probabilidade prevista de lucro fica abaixo do ponto de equilíbrio da estratégia (perda média ÷ (ganho médio + perda média)) mais esta margem |
+| `walkforward.n_janelas` | janelas de teste consecutivas do walk-forward |
+| `walkforward.proporcao_treino` | fração de cada janela usada como treino (0.7 = treino com 70%, teste com 30%) |
+| `walkforward.ancorado` | ligado: o treino sempre começa no início dos dados (cresce); desligado: janela deslizante de tamanho fixo |
+| `walkforward.top_ranking` | quantas estratégias do ranking comparar no modo "lote" |
+
+## As estratégias
+
+Cada estratégia combina **vários indicadores com pesos e filtros de regime** em vez de um único cruzamento:
+
+| Família | O que faz |
+|---|---|
+| `pontuacao_ponderada` | 6 indicadores normalizados em [-1, 1] com pesos formam uma pontuação; entra quando ela cruza o limiar com ≥4 componentes concordando e ATR em regime normal (`score_tendencia`, `score_reversao`, `score_momentum_volume`) |
+| `regime_adaptativo` | votação de Efficiency Ratio, ADX e Choppiness classifica o regime; em tendência opera pullback, em lateral opera reversão nas bandas (`regime_adaptativo`); compressão→expansão de volatilidade com direção por pontuação (`expansao_volatilidade`) |
+| `estatistica` | z-score em 3 horizontes filtrado pela autocorrelação dos retornos (`zscore_multiplo`); canal de regressão linear com R² e desvio residual (`canal_regressao`); continuação só com persistência estatística (`momentum_persistente`) |
+| `confluencia` | dois timeframes superiores (reamostrados só com barras concluídas) precisam concordar antes do gatilho (`confluencia_tf`); 5 osciladores normalizados + divergência (`confluencia_osciladores`) |
+| `divergencia` | divergência regular entre pivôs confirmados do preço e do RSI/MACD/CCI (`divergencia_pivos`) |
+| `fluxo_volume` | pontuação de 6 medidores de fluxo (CMF, MFI, OBV, Force Index, delta agressor, VWAP) (`fluxo_ponderado`); bandas de desvio da VWAP diária (`bandas_vwap`) |
+| `estrutura_mercado` | HH/HL x LH/LL por pivôs e rompimento de estrutura com volume (`estrutura_mercado`); força composta do candle com contexto (`forca_candle`) |
+| `ensemble` | média ponderada do viés contínuo de 6 estratégias-membro com concordância mínima (`ensemble`) |
+
+## Walk-forward (aba 4 / `python main.py walkforward`)
+
+O ranking usa uma única divisão treino/validação. O walk-forward vai além: divide o histórico em **N janelas de teste
+consecutivas**; para cada uma, stop/alvo são reotimizados **só no trecho anterior** (treino deslizante ou ancorado) e
+aplicados no teste, que a otimização nunca viu. Os testes são concatenados numa única curva fora da amostra. Medidas:
+
+- **% de janelas lucrativas** e **eficiência walk-forward** (lucro por barra no teste ÷ no treino; ≈1 = o teste rende
+  tanto quanto o treino, < 0.5 sugere sobreajuste);
+- **estabilidade dos parâmetros** (fração das janelas que escolheram a mesma combinação de stop/alvo);
+- **pontuação walk-forward** (0–100: 35% janelas lucrativas, 25% eficiência, 20% fator de lucro, 10% drawdown,
+  10% estabilidade; metade se houver prejuízo fora da amostra) e **veredito**: *robusta*, *moderada*, *frágil* ou
+  *inconclusiva* (poucos trades);
+- comparação com os **stop/alvo fixos** escolhidos pelo ranking (curva tracejada), para ver se reotimizar ajuda.
+
+Resultados são salvos em `resultados/walkforward_<ativo>_<timeframe>_<estrategia>.json`.
 
 ## Como a melhor estratégia é escolhida
 
@@ -117,8 +171,10 @@ O que **nenhum** backtest elimina e você deve considerar:
 - **stop e alvo no mesmo candle**: o backtest assume o stop (pior caso); ao vivo pode ter sido o alvo;
 - **ordens rejeitadas** (margem, mercado fechado, modo de preenchimento) só existem ao vivo — aparecem no log;
 - **filtro de IA**: em operação o modelo é retreinado com todo o histórico (mais dados que no ranking), então os vetos ao vivo não são exatamente os da coluna "Com IA"; o teste de fidelidade garante que, com o mesmo modelo, executor e backtest vetam os mesmos sinais;
-- **aquecimento de indicadores**: ao vivo o executor usa uma janela recente de candles; EMAs muito longas podem
-  diferir por frações de ponto do valor calculado com todo o histórico.
+- **aquecimento de indicadores**: ao vivo o executor usa uma janela recente de candles (2x `barras_minimas()` da
+  estratégia, no mínimo 1000); EMAs muito longas podem diferir por frações de ponto do valor calculado com todo o
+  histórico. As estratégias multi-timeframe (`confluencia_tf`, `ensemble`) pedem janelas maiores (fator × 300 candles)
+  para as EMAs do timeframe superior convergirem — garanta `Max bars in chart` suficiente no MT5.
 
 ## Arquitetura (arquitetura limpa)
 
@@ -128,11 +184,12 @@ config/configuracao.py      dataclasses + JSON de configuração
 dominio/                    regras puras, sem dependências externas
   indicadores.py            indicadores técnicos
   modelos.py                Trade, Posicao, ResultadoBacktest...
-  estrategias/              base.py + 8 módulos por família + catalogo.py
+  estrategias/              base.py (utilitários de pontuação ponderada) + 8 módulos por família + catalogo.py
 aplicacao/                  casos de uso
   backtester.py             motor de simulação
   metricas.py               métricas de desempenho
   seletor.py                pontuação de consistência e ranking
+  walkforward.py            análise walk-forward (reotimização por janelas + teste fora da amostra)
   executor.py               laço de operação ao vivo
   servicos.py               orquestração usada pela interface
   portas.py                 interfaces (ProvedorDados, Corretora)
@@ -146,21 +203,29 @@ testes/                     pytest
 
 Crie uma classe herdando `EstrategiaBase` em um módulo de `dominio/estrategias/`, implemente
 `gerar_sinais(df)` retornando uma Series com 1/-1/0 e adicione instâncias em `registrar()`.
-Ela entra automaticamente no catálogo, no backtest e no ranking.
+Ela entra automaticamente no catálogo, no backtest, no ranking e no walk-forward. Se implementar
+`vies(df)` (série contínua em [-1, 1]), ela também pode ser usada como membro do ensemble.
 
 ```python
 class MinhaEstrategia(EstrategiaBase):
     identificador = "minha"
-    familia = "tendencia"
+    familia = "pontuacao_ponderada"
     descricao = "..."
     stop_atr_padrao, alvo_atr_padrao = 2.0, 3.0
 
+    def _componentes(self, df):
+        f, a = df["fechamento"], ind.atr(df, 14)
+        return {"rsi": (limitar((ind.rsi(f, 14) - 50) / 25), 1.0),
+                "ema": (normalizar((ind.ema(f, 9) - ind.ema(f, 21)) / a, 1.0), 1.5)}
+
     def gerar_sinais(self, df):
-        r = ind.rsi(df["fechamento"], self.p("periodo"))
-        return montar_sinais(cruzou_acima(r, 50), cruzou_abaixo(r, 50))
+        comp = self._componentes(df)
+        score = pontuacao_ponderada(comp)                       # média ponderada em [-1, 1]
+        return gatilho_por_limiar(score, self.p("limiar"))     # cruzamento de ±limiar
 ```
 
 ## Arquivos gerados
 
 - `resultados/ranking_<ativo>_<timeframe>.json` — ranking completo com métricas.
+- `resultados/walkforward_<ativo>_<timeframe>_<estrategia>.json` — janelas, métricas fora da amostra e veredito do walk-forward.
 - `registros/robo_<data>.log` — log de tudo que o robô faz (ordens, sinais, erros).

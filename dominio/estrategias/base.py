@@ -42,6 +42,37 @@ def montar_sinais(compras: pd.Series, vendas: pd.Series) -> pd.Series:
     return sinais
 
 
+def normalizar(serie: pd.Series, escala: float) -> pd.Series:
+    """Comprime um valor para o intervalo (-1, 1) com tanh; `escala` é o valor que vira ~0.76."""
+    return np.tanh(serie / escala)
+
+
+def limitar(serie: pd.Series, minimo: float = -1.0, maximo: float = 1.0) -> pd.Series:
+    return serie.clip(lower=minimo, upper=maximo)
+
+
+def pontuacao_ponderada(componentes: dict) -> pd.Series:
+    """Média ponderada de componentes já normalizados em [-1, 1].
+
+    `componentes` = {nome: (serie, peso)}. O resultado fica em [-1, 1]; é NaN
+    enquanto qualquer componente ainda estiver em aquecimento, para que a
+    pontuação nunca seja calculada com indicadores parciais."""
+    series = pd.concat({n: s * p for n, (s, p) in componentes.items()}, axis=1)
+    total_pesos = sum(p for _, p in componentes.values())
+    return series.sum(axis=1, skipna=False) / total_pesos
+
+
+def concordancia(componentes: dict, direcao: int, minimo: float = 0.2) -> pd.Series:
+    """Quantos componentes apontam na direção (+1/-1) com intensidade mínima."""
+    series = pd.concat({n: (s * direcao >= minimo).astype(int) for n, (s, _) in componentes.items()}, axis=1)
+    return series.sum(axis=1)
+
+
+def gatilho_por_limiar(pontuacao: pd.Series, limiar: float) -> pd.Series:
+    """Sinais quando a pontuação cruza +limiar (compra) ou -limiar (venda)."""
+    return montar_sinais(cruzou_acima(pontuacao, limiar), cruzou_abaixo(pontuacao, -limiar))
+
+
 # --------------------------------------------------------------- base
 class EstrategiaBase(ABC):
     identificador: str = "base"
@@ -66,8 +97,9 @@ class EstrategiaBase(ABC):
         return self.parametros[chave]
 
     def barras_minimas(self) -> int:
+        """Barras necessárias para os indicadores convergirem (os filtros de regime usam percentis de 200 barras)."""
         maiores = [v for v in self.parametros.values() if isinstance(v, (int, float)) and v > 1]
-        return int(max(maiores + [50])) * 3 + self.periodo_atr + 30
+        return int(max(maiores + [100])) * 3 + self.periodo_atr + 30
 
     # ---- sinais
     @abstractmethod
@@ -76,6 +108,11 @@ class EstrategiaBase(ABC):
 
     def sinais_limpos(self, df: pd.DataFrame) -> pd.Series:
         return self.gerar_sinais(df).reindex(df.index).fillna(0).astype(int)
+
+    def vies(self, df: pd.DataFrame):
+        """Viés contínuo em [-1, 1] (positivo = altista) usado pelo ensemble.
+        Estratégias sem pontuação contínua retornam None."""
+        return None
 
     # ---- risco
     def configurar_risco(self, mult_stop: float, mult_alvo: float) -> None:

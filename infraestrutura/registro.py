@@ -3,9 +3,12 @@ from __future__ import annotations
 
 import logging
 import os
+import sys
 from datetime import datetime
 
-PASTA_REGISTROS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "registros")
+from config.caminhos import caminho
+
+PASTA_REGISTROS = caminho("registros")
 
 
 def obter_registrador(nome: str = "robo") -> logging.Logger:
@@ -17,8 +20,9 @@ def obter_registrador(nome: str = "robo") -> logging.Logger:
     formato = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s", "%Y-%m-%d %H:%M:%S")
     arquivo = logging.FileHandler(os.path.join(PASTA_REGISTROS, f"robo_{datetime.now():%Y%m%d}.log"), encoding="utf-8")
     arquivo.setFormatter(formato)
-    console = logging.StreamHandler()
-    console.setFormatter(formato)
     registrador.addHandler(arquivo)
-    registrador.addHandler(console)
+    if sys.stderr is not None:  # o executável em modo janela não tem console
+        console = logging.StreamHandler()
+        console.setFormatter(formato)
+        registrador.addHandler(console)
     return registrador

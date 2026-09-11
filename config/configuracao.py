@@ -13,7 +13,9 @@ import os
 from dataclasses import dataclass, field, asdict
 from typing import List
 
-CAMINHO_PADRAO = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "configuracao.json")
+from config.caminhos import caminho
+
+CAMINHO_PADRAO = caminho("configuracao.json")
 
 
 @dataclass
@@ -44,6 +46,14 @@ class ConfiguracaoExecucao:
 
 
 @dataclass
+class ConfiguracaoWalkForward:
+    n_janelas: int = 6                     # quantidade de janelas fora da amostra (teste)
+    proporcao_treino: float = 0.7          # fração de cada janela usada para otimizar stop/alvo (treino)
+    ancorado: bool = False                 # True: o treino começa sempre no início dos dados (janela crescente)
+    top_ranking: int = 10                  # quantas estratégias do ranking comparar no modo "lote"
+
+
+@dataclass
 class ConfiguracaoIA:
     ativar: bool = False                   # filtro de IA (RandomForest) que veta sinais de baixa probabilidade
     margem_probabilidade: float = 0.05     # veta se p(lucro) < ponto de equilíbrio da estratégia + margem
@@ -66,6 +76,7 @@ class Configuracao:
     backtest: ConfiguracaoBacktest = field(default_factory=ConfiguracaoBacktest)
     execucao: ConfiguracaoExecucao = field(default_factory=ConfiguracaoExecucao)
     ia: ConfiguracaoIA = field(default_factory=ConfiguracaoIA)
+    walkforward: ConfiguracaoWalkForward = field(default_factory=ConfiguracaoWalkForward)
 
     # ------------------------------------------------------------------ util
     def para_dict(self) -> dict:
@@ -83,6 +94,9 @@ class Configuracao:
                 valor = dict(valor)
                 valor.pop("limiar_probabilidade", None)  # campo antigo (limiar absoluto), substituído pela margem
                 cfg.ia = ConfiguracaoIA(**{k: v for k, v in valor.items() if k in ConfiguracaoIA.__dataclass_fields__})
+            elif chave == "walkforward":
+                cfg.walkforward = ConfiguracaoWalkForward(**{k: v for k, v in valor.items()
+                                                             if k in ConfiguracaoWalkForward.__dataclass_fields__})
             elif chave in cls.__dataclass_fields__:
                 setattr(cfg, chave, valor)
         return cfg
@@ -97,7 +111,7 @@ class Configuracao:
             cfg = cls()
             cfg.salvar(caminho)
             return cfg
-        with open(caminho, "r", encoding="utf-8") as arq:
+        with open(caminho, "r", encoding="utf-8-sig") as arq:  # tolera o BOM que o Bloco de Notas adiciona
             return cls.de_dict(json.load(arq))
 
     def resumo(self) -> str:

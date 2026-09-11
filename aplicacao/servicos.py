@@ -11,6 +11,7 @@ import pandas as pd
 from aplicacao.backtester import Backtester
 from aplicacao.executor import Executor
 from aplicacao.seletor import SeletorEstrategias
+from aplicacao.walkforward import AnalisadorWalkForward
 from config.configuracao import Configuracao
 from dominio.estrategias.base import EstrategiaBase
 from dominio.estrategias.catalogo import construir_catalogo, obter_estrategia
@@ -171,6 +172,73 @@ def instanciar_do_ranking(entrada: dict) -> Optional[EstrategiaBase]:
 
 def backtest_detalhado(cfg: Configuracao, df: pd.DataFrame, estrategia: EstrategiaBase, filtro_ia=None):
     return criar_backtester(cfg).executar(df, estrategia, filtro_ia=filtro_ia)
+
+
+# ------------------------------------------------------------------ walk-forward
+def resolver_estrategia_para_walkforward(cfg: Configuracao, nome: str):
+    """Instancia a estratégia pelo nome; se ela estiver no ranking salvo, devolve também o stop/alvo lá escolhidos."""
+    estrategia = obter_estrategia(nome)
+    if estrategia is None:
+        raise ValueError(f"Estratégia '{nome}' não existe no catálogo atual (rode o backtest novamente).")
+    dados = carregar_ranking(cfg)
+    entrada = next((r for r in (dados or {}).get("ranking", []) if r["nome"] == nome), None)
+    mult_fixos = (entrada["mult_stop"], entrada["mult_alvo"]) if entrada else None
+    return estrategia, mult_fixos
+
+
+def executar_walk_forward(cfg: Configuracao, df: pd.DataFrame, nome: str, progresso: Optional[Callable] = None,
+                          salvar: bool = True) -> dict:
+    estrategia, mult_fixos = resolver_estrategia_para_walkforward(cfg, nome)
+    wf = cfg.walkforward
+    analisador = AnalisadorWalkForward(criar_backtester(cfg), cfg.backtest, cfg.capital_inicial)
+    resultado = analisador.analisar(df, estrategia, wf.n_janelas, wf.proporcao_treino, wf.ancorado, mult_fixos, progresso)
+    if salvar:
+        resultado["arquivo"] = persistencia.salvar_walkforward(resultado, cfg.ativo or "SINTETICO", cfg.timeframe)
+    return resultado
+
+
+def walk_forward_lote(cfg: Configuracao, df: pd.DataFrame, nomes: List[str],
+                      progresso: Optional[Callable] = None) -> List[dict]:
+    """Walk-forward de várias estratégias (ex.: as N melhores do ranking), ordenado pela pontuação walk-forward."""
+    resultados = []
+    total = len(nomes)
+    for k, nome in enumerate(nomes, 1):
+        if progresso:
+            progresso(k, total, nome)
+        try:
+            r = executar_walk_forward(cfg, df, nome, salvar=False)
+            resumo = {chave: r[chave] for chave in ("estrategia", "familia", "pontuacao", "veredito", "pct_janelas_positivas",
+                                                    "eficiencia", "estabilidade_parametros", "metricas_teste", "motivos",
+                                                    "parametros_mais_frequentes")}
+            resumo["metricas_teste_fixo"] = r.get("metricas_teste_fixo")
+            resultados.append(resumo)
+        except Exception as erro:
+            resultados.append({"estrategia": nome, "familia": "", "pontuacao": 0.0, "veredito": "erro", "erro": str(erro),
+                               "pct_janelas_positivas": 0.0, "eficiencia": 0.0, "estabilidade_parametros": 0.0,
+                               "metricas_teste": {}, "motivos": [str(erro)], "parametros_mais_frequentes": [None, None]})
+    resultados.sort(key=lambda r: (r["pontuacao"], r["metricas_teste"].get("lucro_liquido", 0.0)), reverse=True)
+    for pos, r in enumerate(resultados, 1):
+        r["posicao"] = pos
+    return resultados
+
+
+def texto_walkforward(r: dict) -> str:
+    m = r["metricas_teste"]
+    linhas = [f"Walk-forward de {r['estrategia']} | {r['n_janelas']} janelas ({'ancorado' if r['ancorado'] else 'deslizante'}), "
+              f"treino {r['barras_treino']} barras / teste {r['barras_teste']} barras | veredito: {r['veredito'].upper()} "
+              f"(pontuação {r['pontuacao']})",
+              f"Fora da amostra (todas as janelas): {m['total_trades']} trades | lucro {m['lucro_liquido']:,.2f} | fator de lucro "
+              f"{m['fator_lucro']:.2f} | acerto {m['taxa_acerto']:.0f}% | drawdown {m['drawdown_maximo']:,.2f} | "
+              f"janelas lucrativas {r['pct_janelas_positivas']:.0f}% | eficiência WF {r['eficiencia']:.2f} | "
+              f"estabilidade stop/alvo {r['estabilidade_parametros']:.0%} (mais frequente {r['parametros_mais_frequentes'][0]}/"
+              f"{r['parametros_mais_frequentes'][1]})"]
+    if r.get("metricas_teste_fixo"):
+        mf = r["metricas_teste_fixo"]
+        linhas.append(f"Com stop/alvo fixos do ranking ({r['mult_fixos'][0]}/{r['mult_fixos'][1]}): {mf['total_trades']} trades | "
+                      f"lucro {mf['lucro_liquido']:,.2f} | fator de lucro {mf['fator_lucro']:.2f} | drawdown {mf['drawdown_maximo']:,.2f}")
+    for motivo in r.get("motivos", []):
+        linhas.append(f"  → {motivo}")
+    return "\n".join(linhas)
 
 
 def preparar_filtro_ia(cfg: Configuracao, df: pd.DataFrame, estrategia: EstrategiaBase):
