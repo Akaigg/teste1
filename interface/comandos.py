@@ -30,6 +30,12 @@ def construir_parser() -> argparse.ArgumentParser:
     o = sub.add_parser("operar", help="inicia a operação automática")
     o.add_argument("--real", action="store_true", help="envia ordens reais (padrão: simulado)")
     o.add_argument("--estrategia", help="força uma estratégia do ranking pelo nome")
+    w = sub.add_parser("walkforward", help="análise walk-forward (consistência fora da amostra) de uma estratégia")
+    w.add_argument("--estrategia", help="nome da estratégia (padrão: a melhor do ranking salvo)")
+    w.add_argument("--top", type=int, default=0, help="compara as N melhores do ranking em vez de uma só")
+    w.add_argument("--janelas", type=int, help="número de janelas de teste")
+    w.add_argument("--treino", type=float, help="fração de cada janela usada como treino (ex.: 0.7)")
+    w.add_argument("--ancorado", action="store_true", help="treino cresce desde o início dos dados")
     sub.add_parser("conexao", help="verifica conexão com o MT5")
     sb = sub.add_parser("simbolos", help="lista símbolos disponíveis na corretora (ex.: simbolos WIN)")
     sb.add_argument("filtro", nargs="?", default="WIN", help="texto contido no nome (padrão: WIN)")
@@ -102,6 +108,14 @@ def executar(argv=None) -> None:
             servicos.montar_executor(cfg, estrategia, df).iniciar()
         else:
             menu.iniciar_operacao(cfg)
+    elif comando == "walkforward":
+        if args.janelas:
+            cfg.walkforward.n_janelas = args.janelas
+        if args.treino:
+            cfg.walkforward.proporcao_treino = args.treino
+        if args.ancorado:
+            cfg.walkforward.ancorado = True
+        menu.executar_walkforward(cfg, args.estrategia or "", args.top)
     elif comando == "conexao":
         menu.verificar_conexao(cfg)
     elif comando == "simbolos":

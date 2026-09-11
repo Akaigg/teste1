@@ -8,11 +8,11 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional
 
-from dominio.estrategias import (hibridas, momentum, padroes_candle, reversao, rompimento,
-                                 tendencia, volatilidade, volume)
+from dominio.estrategias import (confluencia, divergencia, ensemble, estatistica, estrutura, fluxo, pontuacao,
+                                 regime)
 from dominio.estrategias.base import EstrategiaBase
 
-_MODULOS = [tendencia, reversao, rompimento, volatilidade, momentum, volume, padroes_candle, hibridas]
+_MODULOS = [pontuacao, regime, estatistica, confluencia, divergencia, fluxo, estrutura, ensemble]
 
 
 def construir_catalogo() -> List[EstrategiaBase]:

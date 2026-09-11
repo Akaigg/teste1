@@ -44,6 +44,17 @@ def carregar_ranking(ativo: str, timeframe: str) -> Optional[dict]:
         return json.load(arq)
 
 
+def salvar_walkforward(resultado: dict, ativo: str, timeframe: str) -> str:
+    os.makedirs(PASTA_RESULTADOS, exist_ok=True)
+    seguro = "".join(c if c.isalnum() else "_" for c in ativo) or "sem_ativo"
+    caminho = os.path.join(PASTA_RESULTADOS, f"walkforward_{seguro}_{timeframe}_{resultado['estrategia']}.json")
+    conteudo = {"ativo": ativo, "timeframe": timeframe, "gerado_em": datetime.now().isoformat(timespec="seconds"),
+                "resultado": resultado}
+    with open(caminho, "w", encoding="utf-8") as arq:
+        json.dump(conteudo, arq, indent=2, ensure_ascii=False, default=_serializar)
+    return caminho
+
+
 def salvar_trades(trades: List[dict], nome_estrategia: str) -> str:
     os.makedirs(PASTA_RESULTADOS, exist_ok=True)
     caminho = os.path.join(PASTA_RESULTADOS, f"trades_{nome_estrategia}.json")

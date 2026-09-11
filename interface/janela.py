@@ -1,7 +1,7 @@
 """
 Interface gráfica desktop (Tkinter) do Robô MT5.
 
-Quatro abas: Configuração, Backtest & Ranking, Operação e Estratégias.
+Cinco abas: Configuração, Backtest & Ranking, Operação, Walk-forward e Estratégias.
 Tarefas demoradas (carregar dados, backtest, operação ao vivo) rodam em
 threads; a comunicação com a janela é feita por uma fila processada com
 `after()`, evitando travar a interface. Toda a lógica de negócio continua na
@@ -32,6 +32,20 @@ COLUNAS_RANKING = [
     ("treino", "Treino", 52), ("valid", "Valid.", 52), ("stop", "Stop", 46), ("alvo", "Alvo", 46),
     ("trades", "Trades", 52), ("acerto", "Acerto", 55), ("fl", "F.Lucro", 58), ("lucro", "Lucro", 85),
     ("lucro_val", "Lucro val.", 85), ("dd", "DD máx", 80),
+]
+
+COLUNAS_JANELAS_WF = [
+    ("numero", "#", 30), ("treino", "Treino (período)", 210), ("teste", "Teste (período)", 210), ("stop", "Stop", 44),
+    ("alvo", "Alvo", 44), ("nota_treino", "Nota tr.", 58), ("nota_teste", "Nota teste", 68), ("trades", "Trades", 52),
+    ("lucro", "Lucro teste", 90), ("fl", "F.Lucro", 58), ("dd", "DD", 80), ("acerto", "Acerto", 55), ("efic", "Efic.", 52),
+    ("lucro_fixo", "Lucro c/ fixos", 95),
+]
+
+COLUNAS_COMPARACAO_WF = [
+    ("posicao", "#", 30), ("nome", "Estratégia", 230), ("familia", "Família", 120), ("pontuacao", "Pont. WF", 62),
+    ("veredito", "Veredito", 80), ("janelas", "Janelas +", 66), ("efic", "Efic.", 52), ("estab", "Estab.", 52),
+    ("trades", "Trades", 52), ("lucro", "Lucro OOS", 90), ("fl", "F.Lucro", 58), ("dd", "DD", 80),
+    ("lucro_fixo", "Lucro c/ fixos", 95), ("motivos", "Observações", 400),
 ]
 
 CHAVES_METRICAS = [
@@ -111,14 +125,17 @@ class Aplicativo:
         self.aba_config = ttk.Frame(self.abas, padding=10)
         self.aba_backtest = ttk.Frame(self.abas, padding=10)
         self.aba_operacao = ttk.Frame(self.abas, padding=10)
+        self.aba_walkforward = ttk.Frame(self.abas, padding=10)
         self.aba_estrategias = ttk.Frame(self.abas, padding=10)
         self.abas.add(self.aba_config, text="  1. Configuração  ")
         self.abas.add(self.aba_backtest, text="  2. Backtest & Ranking  ")
         self.abas.add(self.aba_operacao, text="  3. Operação  ")
+        self.abas.add(self.aba_walkforward, text="  4. Walk-forward  ")
         self.abas.add(self.aba_estrategias, text="  Estratégias  ")
         self._construir_config()
         self._construir_backtest()
         self._construir_operacao()
+        self._construir_walkforward()
         self._construir_estrategias()
 
         self.var_status = tk.StringVar(value="Pronto.")
@@ -463,8 +480,14 @@ class Aplicativo:
         ttk.Button(direita, text="Limpar registro", command=self._limpar_log).pack(anchor="e", pady=4)
 
     def _atualizar_lista_estrategias_operacao(self):
-        nomes = [r["nome"] for r in self.ranking if r["pontuacao_final"] > 0]
+        catalogo = {e.nome for e in construir_catalogo()}
+        nomes = [r["nome"] for r in self.ranking if r["pontuacao_final"] > 0 and r["nome"] in catalogo]
+        if self.ranking and not nomes and any(r["pontuacao_final"] > 0 for r in self.ranking):
+            self.var_info_ranking.set(self.var_info_ranking.get() + "\nEste ranking foi gerado com estratégias que não existem "
+                                      "mais no catálogo: rode o backtest novamente.")
         self.combo_estrategia["values"] = nomes
+        if hasattr(self, "combo_estrategia_wf"):
+            self._atualizar_lista_estrategias_walkforward()
         if nomes and self.var_estrategia_operacao.get() not in nomes:
             self.var_estrategia_operacao.set(nomes[0])
         elif not nomes:
@@ -509,6 +532,9 @@ class Aplicativo:
                                        f"Contratos: {self.cfg.contratos}\n\nDeseja continuar?", icon="warning", default="no"):
                 return
         estrategia = servicos.instanciar_do_ranking(entrada)
+        if estrategia is None:
+            messagebox.showerror("Operação", f"A estratégia '{entrada['nome']}' não existe mais no catálogo. Rode o backtest novamente.")
+            return
         self._ocupar(True, "Preparando operação...")
         self.botao_iniciar["state"] = "disabled"
 
@@ -550,6 +576,233 @@ class Aplicativo:
         except Exception:
             pass
         self.raiz.after(3000, self._atualizar_status_operacao)
+
+    # ------------------------------------------------------------- aba walk-forward
+    def _construir_walkforward(self):
+        a = self.aba_walkforward
+        wf = self.cfg.walkforward
+        controles = ttk.Frame(a)
+        controles.pack(fill="x")
+        ttk.Label(controles, text="Estratégia:").pack(side="left")
+        self.var_estrategia_wf = tk.StringVar()
+        self.combo_estrategia_wf = ttk.Combobox(controles, textvariable=self.var_estrategia_wf, state="readonly", width=40)
+        self.combo_estrategia_wf.pack(side="left", padx=(4, 12))
+        ttk.Label(controles, text="Janelas:").pack(side="left")
+        self.var_janelas_wf = tk.IntVar(value=wf.n_janelas)
+        ttk.Spinbox(controles, from_=2, to=30, textvariable=self.var_janelas_wf, width=5).pack(side="left", padx=(4, 12))
+        ttk.Label(controles, text="Treino (fração):").pack(side="left")
+        self.var_treino_wf = tk.StringVar(value=str(wf.proporcao_treino))
+        ttk.Entry(controles, textvariable=self.var_treino_wf, width=6).pack(side="left", padx=(4, 12))
+        self.var_ancorado_wf = tk.BooleanVar(value=wf.ancorado)
+        ttk.Checkbutton(controles, text="Ancorado (treino cresce desde o início)", variable=self.var_ancorado_wf).pack(side="left", padx=(0, 12))
+        self.botao_wf = ttk.Button(controles, text="▶ Rodar walk-forward", command=self._rodar_walkforward)
+        self.botao_wf.pack(side="left")
+
+        lote = ttk.Frame(a)
+        lote.pack(fill="x", pady=(6, 0))
+        self.botao_wf_lote = ttk.Button(lote, text="▶ Comparar as melhores do ranking", command=self._rodar_walkforward_lote)
+        self.botao_wf_lote.pack(side="left")
+        ttk.Label(lote, text="quantidade:").pack(side="left", padx=(8, 2))
+        self.var_top_wf = tk.IntVar(value=wf.top_ranking)
+        ttk.Spinbox(lote, from_=1, to=200, textvariable=self.var_top_wf, width=5).pack(side="left")
+        ttk.Label(lote, text="  (usa o ranking carregado na aba 2; duplo clique numa linha da comparação abre o walk-forward dela)",
+                  foreground="#666").pack(side="left")
+
+        ttk.Label(a, text="O walk-forward divide o histórico em janelas consecutivas de TESTE. Em cada uma, stop/alvo são "
+                          "reotimizados só no trecho anterior (treino) e aplicados no teste, que a otimização nunca viu. Se a "
+                          "estratégia continua consistente janela após janela (e com eficiência próxima de 1), ela é robusta; se só "
+                          "funciona no treino, está sobreajustada.", wraplength=1220, justify="left", foreground="#444").pack(fill="x", pady=6)
+        self.var_resumo_wf = tk.StringVar(value="Nenhum walk-forward executado.")
+        ttk.Label(a, textvariable=self.var_resumo_wf, wraplength=1220, justify="left").pack(fill="x")
+
+        self.subabas_wf = ttk.Notebook(a)
+        self.subabas_wf.pack(fill="both", expand=True, pady=(6, 4))
+        quadro_janelas = ttk.Frame(self.subabas_wf)
+        quadro_comparacao = ttk.Frame(self.subabas_wf)
+        self.subabas_wf.add(quadro_janelas, text="  Janelas  ")
+        self.subabas_wf.add(quadro_comparacao, text="  Comparação (melhores do ranking)  ")
+        self.arvore_wf = self._criar_tabela(quadro_janelas, COLUNAS_JANELAS_WF, altura=7, esticar=("treino", "teste"))
+        self.arvore_wf_lote = self._criar_tabela(quadro_comparacao, COLUNAS_COMPARACAO_WF, altura=7, esticar=("motivos",))
+        self.arvore_wf_lote.bind("<Double-1>", lambda _e: self._walkforward_da_comparacao())
+        for arv in (self.arvore_wf, self.arvore_wf_lote):
+            arv.tag_configure("positivo", background="#e3f4e1")
+            arv.tag_configure("negativo", background="#fbe4e4")
+            arv.tag_configure("robusta", background="#e3f4e1")
+            arv.tag_configure("moderada", background="#fff5d6")
+            arv.tag_configure("fragil", background="#fbe4e4")
+            arv.tag_configure("inconclusiva", foreground="#999")
+            arv.tag_configure("erro", foreground="#b00020")
+
+        ttk.Label(a, text="Curva de capital fora da amostra (janelas de teste concatenadas; faixas alternadas = janelas; "
+                          "tracejado = stop/alvo fixos do ranking)").pack(anchor="w")
+        self.tela_wf = tk.Canvas(a, height=200, bg="white", highlightthickness=1, highlightbackground="#ccc")
+        self.tela_wf.pack(fill="both", expand=True)
+        self.resultado_wf: Optional[dict] = None
+        self.tela_wf.bind("<Configure>", lambda _e: self._desenhar_walkforward())
+        self._atualizar_lista_estrategias_walkforward()
+
+    def _criar_tabela(self, pai, colunas, altura=8, esticar=()):
+        quadro = ttk.Frame(pai)
+        quadro.pack(fill="both", expand=True)
+        arvore = ttk.Treeview(quadro, columns=[c[0] for c in colunas], show="headings", height=altura, selectmode="browse")
+        for chave, texto, largura in colunas:
+            arvore.heading(chave, text=texto)
+            arvore.column(chave, width=largura, minwidth=30, anchor="w" if chave in esticar or chave == "nome" else "center",
+                          stretch=chave in esticar)
+        rolagem = ttk.Scrollbar(quadro, orient="vertical", command=arvore.yview)
+        arvore.configure(yscrollcommand=rolagem.set)
+        arvore.pack(side="left", fill="both", expand=True)
+        rolagem.pack(side="right", fill="y")
+        return arvore
+
+    def _atualizar_lista_estrategias_walkforward(self):
+        catalogo = [e.nome for e in construir_catalogo()]
+        do_ranking = [r["nome"] for r in self.ranking if r["nome"] in catalogo]
+        nomes = do_ranking + [n for n in catalogo if n not in do_ranking]
+        self.combo_estrategia_wf["values"] = nomes
+        if nomes and self.var_estrategia_wf.get() not in nomes:
+            self.var_estrategia_wf.set(nomes[0])
+
+    def _parametros_walkforward(self) -> bool:
+        try:
+            wf = self.cfg.walkforward
+            wf.n_janelas = int(self.var_janelas_wf.get())
+            wf.proporcao_treino = float(str(self.var_treino_wf.get()).replace(",", "."))
+            wf.ancorado = bool(self.var_ancorado_wf.get())
+            wf.top_ranking = int(self.var_top_wf.get())
+            return True
+        except (ValueError, tk.TclError) as erro:
+            messagebox.showerror("Walk-forward", f"Parâmetro inválido: {erro}")
+            return False
+
+    def _rodar_walkforward(self, nome: Optional[str] = None):
+        if self.ocupado or not self._aplicar_campos() or not self._parametros_walkforward():
+            return
+        nome = nome or self.var_estrategia_wf.get()
+        if not nome:
+            messagebox.showwarning("Walk-forward", "Escolha uma estratégia.")
+            return
+        self.cfg.salvar()
+        self._ocupar(True, f"Walk-forward de {nome}...")
+
+        def tarefa():
+            try:
+                df = self._obter_dados()
+                resultado = servicos.executar_walk_forward(self.cfg, df, nome, lambda k, t, s: self.fila.put(("progresso", k, t, s)))
+                self.fila.put(("walkforward", resultado))
+            except Exception as erro:
+                self.fila.put(("erro", f"Falha no walk-forward: {erro}"))
+            finally:
+                self.fila.put(("livre",))
+        threading.Thread(target=tarefa, daemon=True).start()
+
+    def _rodar_walkforward_lote(self):
+        if self.ocupado or not self._aplicar_campos() or not self._parametros_walkforward():
+            return
+        catalogo = {e.nome for e in construir_catalogo()}
+        nomes = [r["nome"] for r in self.ranking if r["pontuacao_final"] > 0 and r["nome"] in catalogo][:self.cfg.walkforward.top_ranking]
+        if not nomes:
+            messagebox.showwarning("Walk-forward", "Nenhuma estratégia elegível no ranking. Rode o backtest na aba 2.")
+            return
+        self.cfg.salvar()
+        self._ocupar(True, f"Walk-forward de {len(nomes)} estratégias do ranking...")
+
+        def tarefa():
+            try:
+                df = self._obter_dados()
+                lista = servicos.walk_forward_lote(self.cfg, df, nomes, lambda k, t, s: self.fila.put(("progresso", k, t, s)))
+                self.fila.put(("walkforward_lote", lista))
+            except Exception as erro:
+                self.fila.put(("erro", f"Falha no walk-forward: {erro}"))
+            finally:
+                self.fila.put(("livre",))
+        threading.Thread(target=tarefa, daemon=True).start()
+
+    def _obter_dados(self):
+        """Reaproveita os candles do último backtest quando o ativo/timeframe não mudou."""
+        if self.df is None or len(self.df) < 500:
+            self.df = servicos.carregar_dados(self.cfg)
+            self.fila.put(("status", f"{len(self.df)} candles carregados."))
+        return self.df
+
+    def _walkforward_da_comparacao(self):
+        sel = self.arvore_wf_lote.selection()
+        if sel:
+            self.var_estrategia_wf.set(sel[0])
+            self._rodar_walkforward(sel[0])
+
+    def _mostrar_walkforward(self, r: dict):
+        self.resultado_wf = r
+        self.var_resumo_wf.set(servicos.texto_walkforward(r))
+        self.arvore_wf.delete(*self.arvore_wf.get_children())
+        for j in r["janelas"]:
+            t, tf = j["teste"], j.get("teste_fixo")
+            valores = [j["numero"], f"{j['inicio_treino'][:16]} → {j['fim_treino'][:16]}", f"{j['inicio_teste'][:16]} → {j['fim_teste'][:16]}",
+                       j["mult_stop"], j["mult_alvo"], _fmt(j["nota_treino"], 0), _fmt(j["nota_teste"], 0), t["trades"],
+                       _fmt(t["lucro"]), _fmt(t["fator_lucro"]), _fmt(t["drawdown"]), _fmt(t["acerto"], 0),
+                       "-" if j["eficiencia"] is None else _fmt(j["eficiencia"]), _fmt(tf["lucro"]) if tf else "-"]
+            self.arvore_wf.insert("", "end", values=valores, tags=("positivo" if t["lucro"] > 0 else "negativo",))
+        self.subabas_wf.select(0)
+        self._desenhar_walkforward()
+
+    def _mostrar_walkforward_lote(self, lista):
+        self.arvore_wf_lote.delete(*self.arvore_wf_lote.get_children())
+        for r in lista:
+            m, mf = r.get("metricas_teste", {}), r.get("metricas_teste_fixo")
+            valores = [r["posicao"], r["estrategia"], r["familia"], _fmt(r["pontuacao"], 1), r["veredito"],
+                       f"{r['pct_janelas_positivas']:.0f}%", _fmt(r["eficiencia"]), f"{r['estabilidade_parametros'] * 100:.0f}%",
+                       m.get("total_trades", 0), _fmt(m.get("lucro_liquido", 0.0)), _fmt(m.get("fator_lucro", 0.0)),
+                       _fmt(m.get("drawdown_maximo", 0.0)), _fmt(mf["lucro_liquido"]) if mf else "-", "; ".join(r.get("motivos", []))]
+            self.arvore_wf_lote.insert("", "end", iid=r["estrategia"], values=valores, tags=(r["veredito"],))
+        self.subabas_wf.select(1)
+        robustas = sum(1 for r in lista if r["veredito"] == "robusta")
+        self.var_resumo_wf.set(f"Comparação concluída: {len(lista)} estratégias | {robustas} robusta(s) | "
+                               f"melhor: {lista[0]['estrategia']} (pontuação WF {lista[0]['pontuacao']}, {lista[0]['veredito']})"
+                               if lista else "Comparação sem resultados.")
+
+    def _desenhar_walkforward(self):
+        tela = self.tela_wf
+        tela.delete("all")
+        r = self.resultado_wf
+        if r is None:
+            tela.create_text(10, 10, anchor="nw", text="Rode um walk-forward para ver a curva fora da amostra.", fill="#666")
+            return
+        curva, cortes = r["curva_teste"], r["cortes_curva"]
+        curva_fixo = r.get("curva_teste_fixo")
+        largura, altura = max(tela.winfo_width(), 300), max(tela.winfo_height(), 120)
+        margem = 44
+        if len(curva) < 2:
+            tela.create_text(10, 10, anchor="nw", text="Sem trades fora da amostra.", fill="#666")
+            return
+        todas = list(curva) + (list(curva_fixo) if curva_fixo else [])
+        minimo, maximo = min(todas), max(todas)
+        faixa = (maximo - minimo) or 1.0
+
+        def ponto(i, v, total):
+            x = margem + (largura - 2 * margem) * i / max(1, total - 1)
+            y = altura - margem + 10 - (altura - 2 * margem) * (v - minimo) / faixa
+            return x, y
+
+        limites = cortes + [len(curva) - 1]
+        for k in range(len(cortes)):
+            x0 = ponto(limites[k], minimo, len(curva))[0]
+            x1 = ponto(limites[k + 1], minimo, len(curva))[0]
+            cor = "#f3f7fb" if k % 2 == 0 else "#ffffff"
+            tela.create_rectangle(x0, 10, x1, altura - margem + 10, fill=cor, outline="")
+            lucro = r["janelas"][k]["teste"]["lucro"]
+            tela.create_text((x0 + x1) / 2, 12, anchor="n", text=f"J{k + 1}\n{lucro:+,.0f}", fill="#1a5" if lucro > 0 else "#b00020",
+                             font=("Segoe UI", 8), justify="center")
+        y0 = ponto(0, curva[0], len(curva))[1]
+        tela.create_line(margem, y0, largura - margem, y0, fill="#bbb", dash=(3, 3))
+        if curva_fixo and len(curva_fixo) > 1:
+            pontos = [ponto(i, v, len(curva_fixo)) for i, v in enumerate(curva_fixo)]
+            tela.create_line(*[c for p in pontos for c in p], fill="#888", width=1, dash=(4, 3))
+        pontos = [ponto(i, v, len(curva)) for i, v in enumerate(curva)]
+        tela.create_line(*[c for p in pontos for c in p], fill="#1f77b4", width=2)
+        tela.create_text(margem, altura - margem + 14, anchor="nw", text=f"mín {minimo:,.0f}", fill="#333", font=("Segoe UI", 8))
+        tela.create_text(4, 10, anchor="nw", text=f"máx\n{maximo:,.0f}", fill="#333", font=("Segoe UI", 8))
+        tela.create_text(largura - margem, altura - margem + 14, anchor="ne",
+                         text=f"{len(curva) - 1} trades | final {curva[-1]:,.0f} | veredito {r['veredito']}", fill="#333", font=("Segoe UI", 8))
 
     # ------------------------------------------------------------- aba estratégias
     def _construir_estrategias(self):
@@ -623,6 +876,15 @@ class Aplicativo:
                         messagebox.showwarning("Nenhuma estratégia elegível",
                                                texto or "Verifique quantidade de candles, horário e distância mínima de stop.")
                     self.abas.select(self.aba_backtest)
+                elif tipo == "walkforward":
+                    self._mostrar_walkforward(evento[1])
+                    self._definir_status(f"Walk-forward concluído: {evento[1]['estrategia']} → {evento[1]['veredito']} "
+                                         f"(pontuação {evento[1]['pontuacao']}). Salvo em {evento[1].get('arquivo', '')}")
+                    self.abas.select(self.aba_walkforward)
+                elif tipo == "walkforward_lote":
+                    self._mostrar_walkforward_lote(evento[1])
+                    self._definir_status("Comparação walk-forward concluída.")
+                    self.abas.select(self.aba_walkforward)
                 elif tipo == "conexao":
                     self.var_conexao.set(evento[1])
                     self._definir_status("Conexão com o MT5 OK.")
@@ -670,7 +932,8 @@ class Aplicativo:
 
     def _ocupar(self, ocupado: bool, texto: str = ""):
         self.ocupado = ocupado
-        self.botao_backtest["state"] = "disabled" if ocupado else "normal"
+        for botao in (self.botao_backtest, self.botao_wf, self.botao_wf_lote):
+            botao["state"] = "disabled" if ocupado else "normal"
         if texto:
             self._definir_status(texto)
         if not ocupado:

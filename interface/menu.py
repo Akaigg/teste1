@@ -113,6 +113,44 @@ def listar_estrategias() -> None:
     ap.imprimir(f"Total: {len(linhas)} estratégias | por família: {familias()}")
 
 
+def executar_walkforward(cfg: Configuracao, nome: str = "", top: int = 0) -> None:
+    """Walk-forward de uma estratégia (nome) ou das `top` melhores do ranking salvo."""
+    ap.titulo("Walk-forward")
+    try:
+        df = servicos.carregar_dados(cfg)
+        wf = cfg.walkforward
+        ap.imprimir(f"{len(df)} candles | {wf.n_janelas} janelas ({'ancorado' if wf.ancorado else 'deslizante'}) | treino {wf.proporcao_treino:.0%}")
+        if top:
+            dados = servicos.carregar_ranking(cfg)
+            nomes = [r["nome"] for r in (dados or {}).get("ranking", []) if r["pontuacao_final"] > 0][:top]
+            if not nomes:
+                ap.imprimir("Nenhuma estratégia elegível no ranking salvo. Rode o backtest primeiro.", "yellow")
+                return
+            lista = servicos.walk_forward_lote(cfg, df, nomes, ap.progresso_terminal)
+            linhas = [[r["posicao"], r["estrategia"], f"{r['pontuacao']:.1f}", r["veredito"], f"{r['pct_janelas_positivas']:.0f}%",
+                       f"{r['eficiencia']:.2f}", f"{r['estabilidade_parametros']:.0%}", r["metricas_teste"].get("total_trades", 0),
+                       ap.moeda(r["metricas_teste"].get("lucro_liquido", 0.0)), "; ".join(r.get("motivos", []))] for r in lista]
+            ap.tabela(["#", "Estratégia", "Pont. WF", "Veredito", "Janelas +", "Efic.", "Estab.", "Trades", "Lucro OOS", "Observações"],
+                      linhas, "Walk-forward das melhores do ranking")
+            return
+        if not nome:
+            estrategia = servicos.melhor_estrategia(cfg)
+            if estrategia is None:
+                ap.imprimir("Informe a estratégia ou rode o backtest para ter um ranking.", "yellow")
+                return
+            nome = estrategia.nome
+        r = servicos.executar_walk_forward(cfg, df, nome, ap.progresso_terminal)
+        ap.imprimir(servicos.texto_walkforward(r), "bold" if r["veredito"] == "robusta" else "")
+        linhas = [[j["numero"], j["inicio_teste"][:16], j["fim_teste"][:16], f"{j['mult_stop']}/{j['mult_alvo']}", f"{j['nota_treino']:.0f}",
+                   f"{j['nota_teste']:.0f}", j["teste"]["trades"], ap.moeda(j["teste"]["lucro"]), f"{j['teste']['fator_lucro']:.2f}",
+                   ap.moeda(j["teste"]["drawdown"]), "-" if j["eficiencia"] is None else f"{j['eficiencia']:.2f}"] for j in r["janelas"]]
+        ap.tabela(["#", "Teste início", "Teste fim", "Stop/Alvo", "Nota tr.", "Nota teste", "Trades", "Lucro", "FL", "DD", "Efic."],
+                  linhas, "Janelas fora da amostra")
+        ap.imprimir(f"Resultado salvo em {r['arquivo']}", "green")
+    except (ErroMT5, ValueError) as erro:
+        ap.imprimir(f"Erro: {erro}", "red")
+
+
 def iniciar_operacao(cfg: Configuracao) -> None:
     ap.titulo(f"Operação automática — modo {cfg.execucao.modo.upper()}")
     estrategia = servicos.melhor_estrategia(cfg)
@@ -186,6 +224,8 @@ def executar_menu(cfg: Configuracao) -> None:
         "7": ("Alternar modo simulado / real", alternar_modo),
         "8": ("Verificar conexão e conta do MT5", verificar_conexao),
         "9": ("Procurar símbolos disponíveis na corretora", lambda c: procurar_simbolos(c)),
+        "10": ("Walk-forward da melhor estratégia (ou das N melhores do ranking)",
+               lambda c: executar_walkforward(c, top=_perguntar("Quantas do ranking comparar (0 = só a melhor)", 0, int))),
     }
     while True:
         ap.titulo("ROBÔ MT5 — Seleção automática de estratégias")
